@@ -3,7 +3,7 @@
 use AvyGet\Exceptions\ImageNotFound;
 use AvyGet\Exceptions\ValidationError;
 
-abstract class ProfilePhotoAbstract {
+abstract class AvatarServiceAbstract {
 
     /**
      * @var string
@@ -44,11 +44,12 @@ abstract class ProfilePhotoAbstract {
      */
     public function getUrlArray( array $sizes )
     {
-        foreach ( $sizes as $key => $size ) {
-            $sizes[$key] = $this->resize($size)->getUrl();
-        }
+        return array_map([$this, 'mapReplaceSizeWithUrl'], $sizes);
+    }
 
-        return $sizes;
+    protected function mapReplaceSizeWithUrl( $size )
+    {
+        return $this->morphImageUrlSize($this->url, $size);
     }
 
     /**
@@ -57,7 +58,7 @@ abstract class ProfilePhotoAbstract {
      * @param integer $size
      * @return string
      */
-    public function resize( $size )
+    public function resizeUrl( $size )
     {
         $this->url = $this->morphImageUrlSize($this->url, $size);
 
@@ -144,93 +145,6 @@ abstract class ProfilePhotoAbstract {
         $headers = get_headers($url);
 
         return (int) substr($headers[0], 9, 3);
-    }
-
-
-
-
-
-
-
-    /**
-     * @param $email
-     * @param $preset
-     * @return string
-     * @throws \Exception
-     */
-    public function getPresetAvatar( $email, $preset )
-    {
-        return $this->getAvatar($email, $this->getPreset($preset));
-    }
-
-    /**
-     * @param       $email
-     * @param array $presets
-     * @return array
-     */
-    public function getPresetAvatars( $email, array $presets )
-    {
-        $avatars = [];
-
-        foreach ( $presets as $preset ) {
-            $avatars[$preset] = $this->getPresetAvatar($email, $preset);
-        }
-
-        return $avatars;
-    }
-
-    /**
-     * @param $preset
-     * @return mixed
-     * @throws \Exception
-     */
-    public function getPreset( $preset )
-    {
-        if ( !array_key_exists($preset, $this->presets) ) {
-            throw new \Exception('Preset not found.');
-        }
-
-        return $this->presets[$preset];
-    }
-
-    /**
-     * @param $size
-     * @return $this
-     * @throws \Exception
-     */
-    public function setDefaultSize( $size )
-    {
-        if ( !is_integer($size) ) {
-            throw new \Exception('Default size must be specified as an integer.');
-        }
-        $this->presets['default'] = $size;
-
-        return $this;
-    }
-
-    /**
-     * @param $key
-     * @param $value
-     * @return $this
-     */
-    public function setPreset( $key, $value )
-    {
-        $this->presets[$key] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param array $presets
-     * @return $this
-     */
-    public function setPresetArray( array $presets )
-    {
-        foreach ( $presets as $key => $value ) {
-            $this->setPreset($key, $value);
-        }
-
-        return $this;
     }
 
 }

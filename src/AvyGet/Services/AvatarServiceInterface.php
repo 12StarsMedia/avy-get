@@ -1,17 +1,6 @@
 <?php namespace AvyGet\Services;
 
-interface ImageUrlInterface {
-
-    /**
-     * @return string
-     */
-    public function getUrl();
-
-    /**
-     * @param integer $size
-     * @return mixed
-     */
-    public function resize( $size );
+interface AvatarServiceInterface {
 
     /**
      * Performs necessary queries and returns an image URL
@@ -32,4 +21,5 @@ interface ImageUrlInterface {
      */
     public function morphImageUrlSize( $url, $size );
 
-} 
+}
+ 

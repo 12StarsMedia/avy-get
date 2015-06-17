@@ -2,7 +2,8 @@
 
 use AvyGet\Exceptions\ImageNotFound;
 use AvyGet\Exceptions\ProfileNotFound;
-use AvyGet\Services\ImageUrlInterface;
+use AvyGet\Exceptions\ServiceFailed;
+use AvyGet\Services\AvatarUrlInterface;
 use Exception;
 
 class AvyGet {
@@ -11,7 +12,7 @@ class AvyGet {
      * Once an avatar is found, its service instance
      * is set here.
      *
-     * @var ImageUrlInterface
+     * @var AvatarUrlInterface
      */
     protected $avatarService;
 
@@ -24,13 +25,6 @@ class AvyGet {
         'AvyGet\Services\Google',
         'AvyGet\Services\Gravatar',
     ];
-
-    /**
-     * Email to return a photo URL for.
-     *
-     * @var string
-     */
-    protected $email;
 
     /**
      * @param string    $email
@@ -48,9 +42,13 @@ class AvyGet {
     }
 
     /**
+     * Returns the stored URL is there is a working
+     * avatar service available. Returns null if
+     * there is no avatar service.
+     *
      * @return $this
      */
-    public function getUrl()
+    public function url()
     {
         if ( isset($this->avatarService) ) {
             return $this->avatarService->getUrl();
@@ -59,45 +57,46 @@ class AvyGet {
         return null;
     }
 
-    public function getUrlArray( array $sizes )
+    /**
+     * Return array with size values replaced with appropriate
+     * URLs for those size values.
+     *
+     * @param array $sizes
+     * @return array
+     */
+    public function urlArray( array $sizes )
     {
         if ( isset($this->avatarService) ) {
             return $this->avatarService->getUrlArray($sizes);
         }
 
-        return [];
+        return array_map(function()
+        {
+            return null;
+        }, $sizes);
     }
 
     /**
+     * Resize the size parameter on the URL if there
+     * is a working avatarService. Otherwise do
+     * nothing and return this class.
+     *
      * @param $size
      * @return $this
      */
     public function resize( $size )
     {
         if ( isset($this->avatarService) ) {
-            $this->avatarService->resize($size);
+            $this->avatarService->resizeUrl($size);
         }
 
         return $this;
     }
 
     /**
-     * Set services for this class to access when
-     * attempting to find a working image URL.
+     * Loops through the $services array until it finds a
+     * service which can return an avatar url.
      *
-     * Services must implement ImageUrlInterface.
-     *
-     * @param array $services
-     * @return $this
-     */
-    public function setServices( array $services )
-    {
-        $this->services = $services;
-
-        return $this;
-    }
-
-    /**
      * @param string  $email
      * @param integer $size
      * @return null
@@ -110,8 +109,10 @@ class AvyGet {
         {
             try {
                 $this->avatarService = new $service($email, $size);
+            }
 
-                return $this;
+            catch ( ServiceFailed $e ) {
+                continue;
             }
 
             catch ( ProfileNotFound $e ) {
@@ -127,7 +128,23 @@ class AvyGet {
             }
         }
 
-        return null;
+        return $this;
+    }
+
+    /**
+     * Set services for this class to access when
+     * attempting to find a working image URL.
+     *
+     * Services must implement AvatarUrlInterface.
+     *
+     * @param array $services
+     * @return $this
+     */
+    public function setServices( array $services )
+    {
+        $this->services = $services;
+
+        return $this;
     }
 
 }

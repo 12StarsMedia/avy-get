@@ -1,9 +1,11 @@
 <?php namespace AvyGet\Services;
 
 use AvyGet\Exceptions\ImageNotFound;
+use AvyGet\Exceptions\ServiceFailed;
 use thomaswelton\GravatarLib\Gravatar as GravatarService;
+use Exception;
 
-class Gravatar extends ProfilePhotoAbstract implements ImageUrlInterface {
+class Gravatar extends AvatarServiceAbstract implements AvatarUrlInterface, AvatarServiceInterface {
 
     /**
      * @var string
@@ -18,10 +20,17 @@ class Gravatar extends ProfilePhotoAbstract implements ImageUrlInterface {
     /**
      * @param string $email
      * @param int    $size
+     * @throws ServiceFailed
      */
     function __construct( $email, $size )
     {
-        $this->gravatar = new GravatarService;
+        try {
+            $this->gravatar = new GravatarService;
+        }
+
+        catch( Exception $e ) {
+            throw new ServiceFailed($e->getMessage());
+        }
 
         parent::__construct($email, $size);
     }

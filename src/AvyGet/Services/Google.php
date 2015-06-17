@@ -2,12 +2,14 @@
 
 use AvyGet\Exceptions\ImageNotFound;
 use AvyGet\Exceptions\ProfileNotFound;
+use AvyGet\Exceptions\ServiceFailed;
 use Google_Auth_OAuth2;
 use Google_Client;
 use Google_Http_Request;
 use Google_Http_REST;
+use Exception;
 
-class Google extends ProfilePhotoAbstract implements ImageUrlInterface {
+class Google extends AvatarServiceAbstract implements AvatarUrlInterface, AvatarServiceInterface {
 
     protected static $urlSizeParam = 'sz';
 
@@ -24,14 +26,22 @@ class Google extends ProfilePhotoAbstract implements ImageUrlInterface {
     /**
      * @param string $email
      * @param int    $size
+     * @throws ServiceFailed
      */
     function __construct( $email, $size )
     {
-        $this->google = new Google_Client;
-        $this->google->setApplicationName(getenv('API.GOOGLE.APP_NAME'));
-        $this->google->setDeveloperKey(getenv('API.GOOGLE.API_KEY'));
+        try
+        {
+            $this->google = new Google_Client;
+            $this->google->setApplicationName(getenv('API.GOOGLE.APP_NAME'));
+            $this->google->setDeveloperKey(getenv('API.GOOGLE.API_KEY'));
 
-        $this->googleOAuth2 = new Google_Auth_OAuth2($this->google);
+            $this->googleOAuth2 = new Google_Auth_OAuth2($this->google);
+        }
+
+        catch( Exception $e ) {
+            throw new ServiceFailed($e->getMessage());
+        }
 
         parent::__construct($email, $size);
     }
