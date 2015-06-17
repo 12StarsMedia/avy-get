@@ -1,36 +1,45 @@
 # AvyGet from [12 Stars Media](http://www.12starsmedia.com)
 This package attempts to get an avatar from an email address by checking Google+ and Gravatar.
 
-## Setup
+## Requirements
+PHP 5.5 and later.
 
-### Require AvyGet using composer:
+## Composer
+Update your `composer.json`
+```
+{
+  "require": {
+    "12-stars-media/avy-get": "0.1.*"
+  }
+}
+```
+Followed by `composer install`.
 
-`composer require 12-stars-media/avy-get`
+## Getting Started
 
-### Add app name and API key to use Google+ API.
-
+### To Use Google+ API
+Create app and API key to use Google+ API.
 1) Set up a project on the [Google Developer Console](https://console.developers.google.com/project)
 2) Enable Google+ API
 3) Create a Public API Access key
 
-### Environment Variables
-
+Set environment variables so that AvyGet can authenticate you with Google's API.
 - `API.GOOGLE.APP_NAME` (the name of your project or app)
 - `API.GOOGLE.API_KEY` (your API key created in step 3 above)
 
-## Basic Usage
+### Basic Usage
 Instantiate a new instance for each email you need a profile image for:
 
 ```
 $avyGet = new AvyGet(
   'avyget@example.com', // Email address to find image for
-  120                   // Desired image size in pixels
+  120                   // Desired image size in pixels (optional)
 );
 
 $avatar = $avyGet->url(); // Returns url for image
 ```
 
-## AvyGet API
+## Documentation
 
 ### Instantiate AvyGet
 
@@ -53,19 +62,21 @@ More services can be created by extending `AvyGet\Services\ProfilePhotoAbstract`
 
 ### Methods
 
-#### `resize( int $size )`
+#### resize( int $size )
 
 Returns modified AvyGet instance (i.e. it is chainable).
 
 `$avyGet->resize(150)->url();`
 
-#### `url()`
+#### url()
 
 Returns the url instantiated with AvyGet or null if no avatar could be found for the provided email.
 
-#### `urlArray( array $sizes )`
+$avyGet->url();
 
-Returns an indexed or associative array based on your input.
+#### urlArray( array $sizes )
+
+Returns an indexed or associative array relative to what to provide it- replaces your size values with the appropriate URLs.
 
 ```
 $avyGet->urlArray([
@@ -100,4 +111,4 @@ $avyGet->urlArray([
 ```
 
 ## License
-The AvyGet package is open-sourced software licensed under the [MIT license](http://opensource.org/licenses/MIT)
+AvyGet is open-sourced software licensed under the [MIT license](http://opensource.org/licenses/MIT)
