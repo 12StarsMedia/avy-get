@@ -33,8 +33,8 @@ class Google extends AvatarServiceAbstract implements AvatarUrlInterface, Avatar
         try
         {
             $this->google = new Google_Client;
-            $this->google->setApplicationName(getenv('API.GOOGLE.APP_NAME'));
-            $this->google->setDeveloperKey(getenv('API.GOOGLE.API_KEY'));
+            $this->google->setApplicationName(getenv('API_GOOGLE_APP_NAME'));
+            $this->google->setDeveloperKey(getenv('API_GOOGLE_API_KEY'));
 
             $this->googleOAuth2 = new Google_Auth_OAuth2($this->google);
         }
