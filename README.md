@@ -24,8 +24,8 @@ Create app and API key to use Google+ API.
 3) Create a Public API Access key
 
 Set environment variables so that AvyGet can authenticate you with Google's API.
-- `API.GOOGLE.APP_NAME` (the name of your project or app)
-- `API.GOOGLE.API_KEY` (your API key created in step 3 above)
+- `API_GOOGLE_APP_NAME` (the name of your project or app)
+- `API_GOOGLE_API_KEY` (your API key created in step 3 above)
 
 ### Basic Usage
 Instantiate a new instance for each email you need a profile image for:
