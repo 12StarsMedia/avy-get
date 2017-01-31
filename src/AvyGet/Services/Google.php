@@ -14,8 +14,6 @@ class Google extends AvatarServiceAbstract implements AvatarUrlInterface, Avatar
 
     protected static $urlSizeParam = 'sz';
 
-    protected $defaultFile1, $defaultFile2;
-
     /**
      * @var Google_Client
      */
@@ -93,14 +91,14 @@ class Google extends AvatarServiceAbstract implements AvatarUrlInterface, Avatar
      */
     protected function checkAgainstDefaultImages($imageUrl)
     {
-        $image1 = md5_file($imageUrl);
-        $image2 = md5_file(__DIR__ . '/../Resources/Images/google_default_image_1.jpg');
-        if($image1 == $image2){
+        $imageFromUrl = md5_file($imageUrl);
+        $defaultImage1 = md5_file(__DIR__ . '/../Resources/Images/google_default_image_1.jpg');
+        if($imageFromUrl == $defaultImage1){
             throw new ImageNotFound('Google profile photo is a default avatar');
         }
 
-        $image2 = md5_file(__DIR__ . '/../Resources/Images/google_default_image_2.jpg');
-        if($image1 == $image2){
+        $defaultImage2 = md5_file(__DIR__ . '/../Resources/Images/google_default_image_2.jpg');
+        if($imageFromUrl == $defaultImage2){
             throw new ImageNotFound('Google profile photo is a default avatar');
         }
     }
