@@ -50,7 +50,7 @@ class Google extends AvatarServiceAbstract implements AvatarUrlInterface, Avatar
         try{
             $response = $this->sendGoogleApiRequest($requestUrl);
         } catch( Google_Service_Exception $e){
-            if( $e->getCode() === '404' ){
+            if( $e->getCode() == '404' ){
                 throw new ProfileNotFound( 'Google profile not found' );
             } else {
                 throw $e;
