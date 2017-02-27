@@ -1,5 +1,5 @@
-# AvyGet from [12 Stars Media](http://www.12starsmedia.com)
-This package attempts to get an avatar from an email address by checking Google+ and Gravatar.
+# AvyGet Avatar Getter
+This package attempts to get an avatar from an email address by checking the PicasaWeb and Gravatar APIs.
 
 ## Requirements
 PHP 5.5 and later.
@@ -9,7 +9,7 @@ Update your `composer.json`
 ```
 {
   "require": {
-    "12-stars-media/avy-get": "0.1.*"
+    "12-stars-media/avy-get": "0.2.*"
   }
 }
 ```
@@ -17,7 +17,7 @@ Followed by `composer install`.
 
 ## Getting Started
 
-### To Use Google+ API
+### To Use PicasaWeb API
 Create app and API key to use Google+ API.
 1) Set up a project on the [Google Developer Console](https://console.developers.google.com/project)
 2) Enable Google+ API
