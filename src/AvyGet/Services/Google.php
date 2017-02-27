@@ -3,13 +3,14 @@
 use AvyGet\Exceptions\ImageNotFound;
 use AvyGet\Exceptions\ProfileNotFound;
 use AvyGet\Exceptions\ServiceFailed;
-use Google_Auth_OAuth2;
 use Google_Client;
 use Google_Http_Request;
 use Google_Http_REST;
+use Google_Service_Exception;
 use Exception;
 
 class Google extends AvatarServiceAbstract implements AvatarUrlInterface, AvatarServiceInterface {
+
 
     protected static $urlSizeParam = 'sz';
 
@@ -17,11 +18,6 @@ class Google extends AvatarServiceAbstract implements AvatarUrlInterface, Avatar
      * @var Google_Client
      */
     protected $google;
-
-    /**
-     * @var Google_Auth_OAuth2
-     */
-    protected $googleOAuth2;
 
     /**
      * @param string $email
@@ -33,10 +29,6 @@ class Google extends AvatarServiceAbstract implements AvatarUrlInterface, Avatar
         try
         {
             $this->google = new Google_Client;
-            $this->google->setApplicationName(getenv('API_GOOGLE_APP_NAME'));
-            $this->google->setDeveloperKey(getenv('API_GOOGLE_API_KEY'));
-
-            $this->googleOAuth2 = new Google_Auth_OAuth2($this->google);
         }
 
         catch( Exception $e ) {
@@ -54,38 +46,26 @@ class Google extends AvatarServiceAbstract implements AvatarUrlInterface, Avatar
      */
     public function getImageUrlByEmail( $email, $size )
     {
-        $profileId = $this->getProfileIdByEmail($email);
+        $requestUrl = "https://picasaweb.google.com/data/entry/api/user/$email?alt=json";
+        try{
+            $response = $this->sendGoogleApiRequest($requestUrl);
+        } catch( Google_Service_Exception $e){
+            if( $e->getCode() == '404' ){
+                throw new ProfileNotFound( 'Google profile not found' );
+            } else {
+                throw $e;
+            }
+        }
 
-        $requestUrl = "https://www.googleapis.com/plus/v1/people/$profileId?fields=image%2Furl";
-        $response = $this->sendGoogleApiRequest($requestUrl);
-
-        if ( empty($imageUrl = $response['image']['url']) ) {
+        if (empty($imageUrl = $response['entry']['gphoto$thumbnail']['$t'])) {
             throw new ImageNotFound('Google profile photo not found.');
         }
+
+        $this->checkAgainstDefaultImages($imageUrl);
 
         $imageUrl = $this->morphImageUrlSize($imageUrl, $size);
 
         return $imageUrl;
-    }
-
-    /**
-     * Search Google Plus API for profile ID using email.
-     *
-     * @param string $email
-     * @return string $profileId
-     * @throws ProfileNotFound
-     */
-    protected function getProfileIdByEmail( $email )
-    {
-        $email = urlencode($email);
-        $requestUrl = "https://www.googleapis.com/plus/v1/people?query=$email&fields=items%2Fid";
-        $response = $this->sendGoogleApiRequest($requestUrl);
-
-        if ( empty($response['items']) || empty($profileId = $response['items'][0]['id']) ) {
-            throw new ProfileNotFound('Google profile not found.');
-        }
-
-        return $profileId;
     }
 
     /**
@@ -94,14 +74,35 @@ class Google extends AvatarServiceAbstract implements AvatarUrlInterface, Avatar
      * @param $url
      * @return array
      */
-    protected function sendGoogleApiRequest( $url )
+    protected function sendGoogleApiRequest($url)
     {
         $rest = new Google_Http_REST();
 
         return $rest->execute(
             $this->google,
-            $this->googleOAuth2->authenticatedRequest(new Google_Http_Request($url))
+            new Google_Http_Request($url)
         );
+    }
+
+    /**
+     * Check avatar image against Google default avatar images
+     *
+     * @param $url
+     * @return void
+     * @throws ImageNotFound
+     */
+    protected function checkAgainstDefaultImages($imageUrl)
+    {
+        $imageFromUrl = md5_file($imageUrl);
+        $defaultImage1 = md5_file(__DIR__ . '/../Resources/Images/google_default_image_1.jpg');
+        if($imageFromUrl == $defaultImage1){
+            throw new ImageNotFound('Google profile photo is a default avatar');
+        }
+
+        $defaultImage2 = md5_file(__DIR__ . '/../Resources/Images/google_default_image_2.jpg');
+        if($imageFromUrl == $defaultImage2){
+            throw new ImageNotFound('Google profile photo is a default avatar');
+        }
     }
 
 }
